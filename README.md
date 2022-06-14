@@ -8,4 +8,4 @@
 ## 정리
 
 * 프로젝트에 관한 자세한 설명은
-[노션](https://www.notion.so/Account-Management-1cdfcbc5c9414fbbadf5c479f07394a9)에 정리해놓았습니다.
+[노션](https://fringe-slug-b73.notion.site/Account-Management-1cdfcbc5c9414fbbadf5c479f07394a9)에 정리해놓았습니다.
