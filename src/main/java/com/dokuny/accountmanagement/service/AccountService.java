@@ -1,5 +1,6 @@
 package com.dokuny.accountmanagement.service;
 
+import com.dokuny.accountmanagement.service.aop.AccountLock;
 import com.dokuny.accountmanagement.service.aop.UserLock;
 
 import com.dokuny.accountmanagement.config.policy.PolicyAccountProperties;
@@ -50,11 +51,15 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public List<Account> getAccountAll(Long userId) {
+        if (!accountUserRepository.existsById(userId)) {
+            throw new AccountException(ErrorCode.USER_NOT_EXIST);
+        }
 
-        return  accountRepository.findAllByAccountUser_Id(userId)
-                .orElseThrow(() -> new AccountException(ErrorCode.USER_NOT_EXIST));
+        return accountRepository.findAllByAccountUser_Id(userId);
     }
 
+
+    @AccountLock
     @Transactional
     public Account unregisterAccount(Long userId, String accountNumber) {
 

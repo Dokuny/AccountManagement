@@ -228,8 +228,12 @@ class AccountServiceTest {
             list.add(Account.builder().build());
         }
 
+        given(accountUserRepository.existsById(anyLong()))
+                .willReturn(true);
+
         given(accountRepository.findAllByAccountUser_Id(anyLong()))
-                .willReturn(Optional.of(list));
+                .willReturn(list);
+
 
         //when
         List<Account> accounts = accountService.getAccountAll(10L);
@@ -242,8 +246,8 @@ class AccountServiceTest {
     @DisplayName("사용자의 모든 계좌 조회 실패 - 존재하지 않는 사용자일 경우")
     void getAccountAllFailByUSER_NOT_EXIST() {
         //given
-        given(accountRepository.findAllByAccountUser_Id(anyLong()))
-                .willReturn(Optional.empty());
+        given(accountUserRepository.existsById(anyLong()))
+                .willReturn(false);
 
         //when
         //then

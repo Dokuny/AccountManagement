@@ -175,8 +175,7 @@ class AccountRepositoryTest {
         //when
         List<Account> accounts =
                 accountRepository
-                        .findAllByAccountUser_Id(user.getId())
-                        .orElseThrow();
+                        .findAllByAccountUser_Id(user.getId());
 
         //then
         assertEquals(10, accounts.size());
