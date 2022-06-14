@@ -1,6 +1,6 @@
 package com.dokuny.accountmanagement.service;
 
-import com.dokuny.accountmanagement.service.aop.AccountLock;
+import com.dokuny.accountmanagement.service.aop.UserLock;
 
 import com.dokuny.accountmanagement.config.policy.PolicyAccountProperties;
 import com.dokuny.accountmanagement.domain.Account;
@@ -18,15 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 
-@Service
 @RequiredArgsConstructor
+@Service
+
 public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountUserRepository accountUserRepository;
     private final AccountNumGenerator accountNumGenerator;
     private final PolicyAccountProperties policyAccountProperties;
 
-    @AccountLock
+    @UserLock
     @Transactional
     public Account createAccount(
             Long userId, Long initialBalance) {
@@ -42,11 +43,11 @@ public class AccountService {
                 .accountNumber(generateAccountNum())
                 .build();
 
-
         // 저장
         return accountRepository.save(account);
     }
-    @AccountLock
+
+
     @Transactional(readOnly = true)
     public List<Account> getAccountAll(Long userId) {
 
@@ -54,7 +55,6 @@ public class AccountService {
                 .orElseThrow(() -> new AccountException(ErrorCode.USER_NOT_EXIST));
     }
 
-    @AccountLock
     @Transactional
     public Account unregisterAccount(Long userId, String accountNumber) {
 
@@ -62,6 +62,7 @@ public class AccountService {
                 .orElseThrow(()->new AccountException(ErrorCode.ACCOUNT_NOT_EXIST));
 
         AccountUser user = account.getAccountUser();
+
         if (!user.getId().equals(userId)) {
             throw new AccountException(ErrorCode.USER_NOT_ACCOUNT_OWNER);
         } else if (account.getAccountStatus() == AccountStatus.CLOSED) {
@@ -90,6 +91,7 @@ public class AccountService {
     private AccountUser checkAccountUser(Long userId) {
         AccountUser accountUser = accountUserRepository.findById(userId)
                 .orElseThrow(() -> new AccountException(ErrorCode.USER_NOT_EXIST));
+
         // 해당 유저가 계좌가 10개인지
         if (accountRepository.
                 countAccountByAccountUser_Id(userId) >= policyAccountProperties.getMax()) {

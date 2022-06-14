@@ -24,6 +24,7 @@ public class GetAccount {
                     .balance(account.getBalance())
                     .build();
         }
+
         public static List<Response> of(List<Account> accounts) {
             ArrayList<Response> list = new ArrayList<>();
 
@@ -32,7 +33,5 @@ public class GetAccount {
             }
             return list;
         }
-
-
     }
 }

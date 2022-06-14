@@ -13,10 +13,13 @@ import java.time.LocalDateTime;
 public class DeleteAccount {
     @Getter
     @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
     public static class Request {
 
         @NotNull
-        @Min(1)
+        @Min(value = 1,message = "부적절한 ID 값 입니다.")
         private Long userId;
 
         @NotNull

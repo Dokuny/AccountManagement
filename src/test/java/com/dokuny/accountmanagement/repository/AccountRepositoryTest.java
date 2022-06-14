@@ -30,53 +30,90 @@ class AccountRepositoryTest {
     @Autowired
     private AccountUserRepository accountUserRepository;
 
-    /**
-     * createAccount Repository Test
-     */
 
     @Test
-    @DisplayName("중복된 계좌번호가 있는지 테스트")
-    void existsAccountByAccountNumber() {
+    @DisplayName("Account 저장")
+    void save() {
         //given
-        AccountUser accountUser = AccountUser.builder()
-                .name("test")
+        Account account = Account.builder()
+                .accountUser(null)
+                .accountNumber("1234567890")
+                .balance(1000L)
+                .accountStatus(AccountStatus.IN_USE)
                 .build();
 
+        //when
+        Account save = accountRepository.save(account);
+
+        //then
+        assertNotNull(save.getId());
+    }
+
+
+    @Test
+    @DisplayName("계좌번호가 존재하는지 여부")
+    void existsAccountByAccountNumber() {
+        //given
         Account account = Account.builder()
-                .accountUser(accountUser)
+                .accountUser(null)
                 .accountStatus(AccountStatus.IN_USE)
-                .accountNumber("1234567891")
+                .accountNumber("1234567890")
                 .balance(1000L)
                 .build();
 
-        accountUserRepository.save(accountUser);
         accountRepository.save(account);
 
         //when
-        boolean result1 =
-                accountRepository.existsAccountByAccountNumber("1234567891");
-        boolean result2 =
+        boolean correct =
                 accountRepository.existsAccountByAccountNumber("1234567890");
+        boolean incorrect =
+                accountRepository.existsAccountByAccountNumber("1234567891");
 
         //then
-        assertTrue(result1);
-        assertFalse(result2);
+        assertTrue(correct);
+        assertFalse(incorrect);
     }
 
     @Test
-    @DisplayName("10개 이상의 계좌를 가지고 있는지")
-    void countAccountByAccountUser_Id(){
+    @DisplayName("계좌번호와 사용자 아이디로 조회")
+    void findByAccountNumberAndAccountUser_Id() {
+//        //given
+
+        AccountUser savedUser =
+                accountUserRepository.save(AccountUser.builder().build());
+
+
+        Account savedAccount = accountRepository.save(Account.builder()
+                .accountUser(savedUser)
+                .accountStatus(AccountStatus.IN_USE)
+                .accountNumber("1234567890")
+                .balance(1000L)
+                .build());
+
+        //when
+        Account find =
+                accountRepository
+                        .findByAccountNumberAndAccountUser_Id(
+                                "1234567890", savedUser.getId())
+                        .orElseThrow();
+
+        //then
+        assertEquals(find, savedAccount);
+    }
+
+    @Test
+    @DisplayName("사용자의 계좌 개수 조회")
+    void countAccountByAccountUser_Id() {
         //given
-        AccountUser accountUser = AccountUser.builder()
+        AccountUser user = accountUserRepository.save(AccountUser.builder()
                 .name("test")
-                .build();
-        accountUserRepository.save(accountUser);
+                .build());
 
         for (int i = 0; i < 10; i++) {
             Account account = Account.builder()
-                    .accountUser(accountUser)
+                    .accountUser(user)
                     .accountStatus(AccountStatus.IN_USE)
-                    .accountNumber("123456789"+i)
+                    .accountNumber("123456789" + i)
                     .balance(1000L)
                     .build();
             accountRepository.save(account);
@@ -85,44 +122,65 @@ class AccountRepositoryTest {
         //when
         Integer count =
                 accountRepository
-                        .countAccountByAccountUser_Id(accountUser.getId());
+                        .countAccountByAccountUser_Id(user.getId());
 
         //then
-        assertEquals(10,count);
-
+        assertEquals(10, count);
     }
 
-    /**
-     *  getAccount Test
-     */
     @Test
-    @DisplayName("가지고 있는 계좌 전부 조회")
-    void findAllByAccountUser_Id(){
+    @DisplayName("계좌번호로 계좌 조회")
+    void findAllByAccountUser_Id() {
         //given
-        AccountUser accountUser = AccountUser.builder()
+        AccountUser user =
+                accountUserRepository.save(AccountUser.builder()
+                        .name("test")
+                        .build());
+
+        Account account =
+                accountRepository.save(Account.builder()
+                        .accountUser(user)
+                        .accountStatus(AccountStatus.IN_USE)
+                        .accountNumber("1234567890")
+                        .balance(1000L)
+                        .build());
+
+        //when
+        Account findAccount =
+                accountRepository
+                        .findByAccountNumber(account.getAccountNumber()).orElseThrow();
+
+        //then
+        assertEquals(account, findAccount);
+    }
+
+    @Test
+    @DisplayName("사용자 아이디로 계좌 모두 조회")
+    void findByAccountNumber() {
+        //given
+        AccountUser user = accountUserRepository.save(AccountUser.builder()
                 .name("test")
-                .build();
-        accountUserRepository.save(accountUser);
+                .build());
 
         for (int i = 0; i < 10; i++) {
             Account account = Account.builder()
-                    .accountUser(accountUser)
+                    .accountUser(user)
                     .accountStatus(AccountStatus.IN_USE)
-                    .accountNumber("123456789"+i)
+                    .accountNumber("123456789" + i)
                     .balance(1000L)
                     .build();
             accountRepository.save(account);
         }
+
         //when
-        List<Account> accounts = accountRepository
-                .findAllByAccountUser_Id(accountUser.getId()).get();
+        List<Account> accounts =
+                accountRepository
+                        .findAllByAccountUser_Id(user.getId())
+                        .orElseThrow();
 
         //then
-        assertEquals(10,accounts.size());
-
+        assertEquals(10, accounts.size());
     }
-
-
 
 
 }

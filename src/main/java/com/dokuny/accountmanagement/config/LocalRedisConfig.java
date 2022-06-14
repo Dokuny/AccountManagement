@@ -2,7 +2,6 @@ package com.dokuny.accountmanagement.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import redis.embedded.RedisServer;
 
 import javax.annotation.PostConstruct;

@@ -2,8 +2,8 @@ package com.dokuny.accountmanagement.exception;
 
 import com.dokuny.accountmanagement.type.ErrorCode;
 
-public class AccountException extends BaseException{
-    public AccountException(ErrorCode errorCode) {
+public class TransactionException extends BaseException{
+    public TransactionException(ErrorCode errorCode) {
         super(errorCode);
     }
 }

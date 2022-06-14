@@ -1,6 +1,5 @@
 package com.dokuny.accountmanagement.service.aop;
 
-import com.dokuny.accountmanagement.exception.AccountException;
 import com.dokuny.accountmanagement.exception.SpinLockException;
 import com.dokuny.accountmanagement.type.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +21,25 @@ public class RedisAspect {
 
     private final RedissonClient redissonClient;
 
-    @Around("@annotation(com.dokuny.accountmanagement.service.aop.AccountLock)")
-    public Object spinLock(ProceedingJoinPoint pjp) throws Throwable {
+    @Around("@annotation(com.dokuny.accountmanagement.service.aop.UserLock)")
+    public Object spinLockByUser(ProceedingJoinPoint pjp) throws Throwable {
         Object[] args = pjp.getArgs();
 
         RLock lock = redissonClient.getLock(args[0].toString());
+
+        return spinLock(lock,pjp);
+    }
+
+    @Around("@annotation(com.dokuny.accountmanagement.service.aop.AccountLock)")
+    public Object spinLockByAccount(ProceedingJoinPoint pjp) throws Throwable {
+        Object[] args = pjp.getArgs();
+
+        RLock lock = redissonClient.getLock(args[1].toString());
+
+        return spinLock(lock,pjp);
+    }
+
+    private Object spinLock(RLock lock,ProceedingJoinPoint pjp) throws Throwable {
 
         boolean isLock = lock.tryLock(60, 5, TimeUnit.SECONDS);
 
@@ -34,7 +47,7 @@ public class RedisAspect {
             throw new SpinLockException(ErrorCode.LOCK_ACQUISITION_FAILED);
         }
         log.info("==========Lock Acquisition==========");
-        Object result = pjp.proceed();
+        Object result = pjp. proceed();
         lock.unlock();
         log.info("==========Lock Returned==========");
 

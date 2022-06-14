@@ -5,7 +5,6 @@ import com.dokuny.accountmanagement.dto.CreateAccount;
 import com.dokuny.accountmanagement.dto.DeleteAccount;
 import com.dokuny.accountmanagement.dto.GetAccount;
 import com.dokuny.accountmanagement.service.AccountService;
-import com.dokuny.accountmanagement.service.RedisTestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +19,12 @@ public class AccountController {
 
     @PostMapping
     public CreateAccount.Response createAccount(
-            @RequestBody @Valid CreateAccount.Request request) throws InterruptedException {
+            @RequestBody @Valid CreateAccount.Request request) {
 
         Account account = accountService.createAccount(
                 request.getUserId(), request.getInitialBalance());
 
-        return CreateAccount.Response.of(request.getUserId(),account);
+        return CreateAccount.Response.of(request.getUserId(), account);
     }
 
     @GetMapping("/{userId}")
@@ -33,7 +32,7 @@ public class AccountController {
 
         List<Account> accounts = accountService.getAccountAll(userId);
 
-        return  GetAccount.Response.of(accounts);
+        return GetAccount.Response.of(accounts);
     }
 
     @DeleteMapping

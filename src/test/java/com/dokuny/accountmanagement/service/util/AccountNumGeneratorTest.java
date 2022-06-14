@@ -1,22 +1,25 @@
 package com.dokuny.accountmanagement.service.util;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 class AccountNumGeneratorTest {
 
-    @Autowired
-    private AccountNumGenerator accountNumGenerator;
+    private final AccountNumGenerator accountNumGenerator
+            = new AccountNumGeneratorByRandom();
 
     @Test
-    void generateNumber(){
+    @DisplayName("계좌번호 생성")
+    void generateNumber() {
         //given
         String number = accountNumGenerator.generateNumber();
         //when
         //then
-        assertEquals(10,number.length());
+        assertEquals(10, number.length());
     }
 
 }

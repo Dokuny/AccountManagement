@@ -1,14 +1,16 @@
 package com.dokuny.accountmanagement.service.util;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
 
-
 @Component
+@Primary
 public class AccountNumGeneratorByRandom implements AccountNumGenerator{
 
-    private Random random = new Random();
+    private final Random random = new Random();
+
     @Override
     public String generateNumber() {
         StringBuilder sb = new StringBuilder();

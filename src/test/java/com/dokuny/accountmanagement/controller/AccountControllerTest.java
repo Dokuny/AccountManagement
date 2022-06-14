@@ -3,7 +3,6 @@ package com.dokuny.accountmanagement.controller;
 import com.dokuny.accountmanagement.domain.Account;
 import com.dokuny.accountmanagement.domain.AccountUser;
 import com.dokuny.accountmanagement.exception.AccountException;
-import com.dokuny.accountmanagement.service.RedisTestService;
 import com.dokuny.accountmanagement.type.AccountStatus;
 import com.dokuny.accountmanagement.service.AccountService;
 import com.dokuny.accountmanagement.type.ErrorCode;
@@ -46,30 +45,26 @@ class AccountControllerTest {
     @MockBean
     private AccountService accountService;
 
-    @MockBean
-    private RedisTestService redisTestService;
 
     /**
-     * createAccount Controller Test
+     * CreateAccount Test
      */
 
     @Test
     @DisplayName("계좌 생성 성공")
     void createAccountSuccess() throws Exception {
-
-        LocalDateTime time = LocalDateTime.now();
-        Account account = Account.builder()
-                .id(10L)
-                .accountStatus(AccountStatus.IN_USE)
-                .balance(500L)
-                .accountUser(AccountUser.builder().build())
-                .accountNumber("1234567890")
-                .registeredAt(time)
-                .build();
         //given
-        given(accountService.createAccount(10L, 500L))
-                .willReturn(account);
+        LocalDateTime time = LocalDateTime.now();
 
+        given(accountService.createAccount(10L, 500L))
+                .willReturn(Account.builder()
+                        .id(10L)
+                        .accountStatus(AccountStatus.IN_USE)
+                        .balance(500L)
+                        .accountUser(null)
+                        .accountNumber("1234567890")
+                        .registeredAt(time)
+                        .build());
 
         Map<String, Long> input = new HashMap<>();
         input.put("userId", 10L);
@@ -80,7 +75,6 @@ class AccountControllerTest {
         mockMvc.perform(post("/account")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(input)))
-                .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.userId").value(10))
                 .andExpect(jsonPath("$.accountNumber")
@@ -89,8 +83,6 @@ class AccountControllerTest {
                         .value(time.format(DateTimeFormatter.ofPattern(
                                 "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS"))))
                 .andExpect(status().isOk());
-
-        System.out.println(account.getRegisteredAt());
     }
 
     @Test
@@ -106,7 +98,6 @@ class AccountControllerTest {
         input.put("userId", 11L);
         input.put("initialBalance", 500L);
 
-
         //when
         //then
         mockMvc.perform(post("/account")
@@ -114,7 +105,7 @@ class AccountControllerTest {
                         .content(objectMapper.writeValueAsString(input)))
                 .andDo(print())
                 .andExpect(jsonPath("$.status")
-                        .value(HttpStatus.FORBIDDEN.value()))
+                        .value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.errorCode")
                         .value(exception.getErrorCode().toString()))
                 .andExpect(jsonPath("$.errorMessage")
@@ -131,7 +122,7 @@ class AccountControllerTest {
      */
 
     @Test
-    @DisplayName("계좌 전부 조회 성공")
+    @DisplayName("사용자의 모든 계좌 조회 성공")
     void getAccountAllSuccess() throws Exception {
         //given
         List<Account> list = new ArrayList<>();
@@ -162,7 +153,7 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("계좌 전부 조회 실패")
+    @DisplayName("사용자의 모든 계좌 조회 실패")
     void getAccountAllFail() throws Exception {
         //given
         AccountException ex = new AccountException(ErrorCode.USER_NOT_EXIST);
@@ -173,7 +164,7 @@ class AccountControllerTest {
         mockMvc.perform(get("/account/1234"))
                 .andDo(print())
                 .andExpect(jsonPath("$.status")
-                        .value(HttpStatus.FORBIDDEN.value()))
+                        .value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.errorCode")
                         .value(ex.getErrorCode().toString()))
                 .andExpect(jsonPath("$.errorMessage")
@@ -182,8 +173,6 @@ class AccountControllerTest {
                         .value(ex.getTimesStamp()
                                 .format(DateTimeFormatter.ofPattern(
                                         "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS"))));
-
-
     }
 
     /**
@@ -242,7 +231,6 @@ class AccountControllerTest {
         mockMvc.perform(delete("/account")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(map)))
-                .andDo(print())
                 .andExpect(jsonPath("$.errorCode").value(ex.getErrorCode().toString()))
                 .andExpect(jsonPath("$.errorMessage")
                         .value(ex.getErrorMessage()))
@@ -250,7 +238,7 @@ class AccountControllerTest {
                         .value(ex.getTimesStamp().format(
                                 DateTimeFormatter.ofPattern(
                                         "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS"))))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isBadRequest());
     }
 
 

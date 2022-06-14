@@ -10,14 +10,17 @@ import java.time.LocalDateTime;
 public class CreateAccount {
 
     @Getter @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
     public static class Request{
 
         @NotNull
-        @Min(1)
+        @Min(value = 1,message = "부적절한 ID값 입니다.")
         private Long userId;
 
         @NotNull
-        @Min(100)
+        @Min(value = 100,message = "초기 잔고는 100 이상부터 가능합니다.")
         private Long initialBalance;
 
 
