@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@RestControllerAdvice()
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({AccountException.class,TransactionException.class})
