@@ -41,16 +41,23 @@ public class RedisAspect {
 
     private Object spinLock(RLock lock,ProceedingJoinPoint pjp) throws Throwable {
 
-        boolean isLock = lock.tryLock(60, 5, TimeUnit.SECONDS);
+        try {
+            boolean isLock = lock.tryLock(60, 5, TimeUnit.SECONDS);
 
-        if (!isLock) {
-            throw new SpinLockException(ErrorCode.LOCK_ACQUISITION_FAILED);
+            if (!isLock) {
+                throw new SpinLockException(ErrorCode.LOCK_ACQUISITION_FAILED);
+            }
+
+            log.info("==========Lock Acquisition==========");
+            return pjp.proceed();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+            log.info("==========Lock Returned==========");
         }
-        log.info("==========Lock Acquisition==========");
-        Object result = pjp. proceed();
-        lock.unlock();
-        log.info("==========Lock Returned==========");
 
-        return result;
+        return null;
     }
 }
