@@ -1,5 +1,6 @@
 package com.dokuny.accountmanagement.service;
 
+import com.dokuny.accountmanagement.dto.AccountDto;
 import com.dokuny.accountmanagement.service.aop.AccountLock;
 import com.dokuny.accountmanagement.service.aop.UserLock;
 
@@ -30,45 +31,41 @@ public class AccountService {
 
     @UserLock
     @Transactional
-    public Account createAccount(
+    public AccountDto createAccount(
             Long userId, Long initialBalance) {
 
-        // 유저 체크
         AccountUser accountUser = checkAccountUser(userId);
 
-        // 계좌 생성
-        Account account = Account.builder()
-                .accountStatus(AccountStatus.IN_USE)
-                .balance(initialBalance)
-                .accountUser(accountUser)
-                .accountNumber(generateAccountNum())
-                .build();
-
-        // 저장
-        return accountRepository.save(account);
+        return AccountDto.of(
+                accountRepository.save(
+                        Account.builder()
+                                .accountStatus(AccountStatus.IN_USE)
+                                .balance(initialBalance)
+                                .accountUser(accountUser)
+                                .accountNumber(generateAccountNum())
+                                .build())
+        );
     }
 
 
     @Transactional(readOnly = true)
-    public List<Account> getAccountAll(Long userId) {
+    public List<AccountDto> getAccountAll(Long userId) {
         if (!accountUserRepository.existsById(userId)) {
             throw new AccountException(ErrorCode.USER_NOT_EXIST);
         }
 
-        return accountRepository.findAllByAccountUser_Id(userId);
+        return AccountDto.of(accountRepository.findAllByAccountUser_Id(userId));
     }
 
 
     @AccountLock
     @Transactional
-    public Account unregisterAccount(Long userId, String accountNumber) {
+    public AccountDto unregisterAccount(Long userId, String accountNumber) {
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(()->new AccountException(ErrorCode.ACCOUNT_NOT_EXIST));
+                .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_EXIST));
 
-        AccountUser user = account.getAccountUser();
-
-        if (!user.getId().equals(userId)) {
+        if (!account.getAccountUser().getId().equals(userId)) {
             throw new AccountException(ErrorCode.USER_NOT_ACCOUNT_OWNER);
         } else if (account.getAccountStatus() == AccountStatus.CLOSED) {
             throw new AccountException(ErrorCode.ACCOUNT_INVALID);
@@ -78,7 +75,7 @@ public class AccountService {
 
         account.close();
 
-        return account;
+        return AccountDto.of(account);
     }
 
 

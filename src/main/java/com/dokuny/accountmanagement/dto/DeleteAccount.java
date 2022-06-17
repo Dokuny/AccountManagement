@@ -1,6 +1,5 @@
 package com.dokuny.accountmanagement.dto;
 
-import com.dokuny.accountmanagement.domain.Account;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -39,12 +38,12 @@ public class DeleteAccount {
         private String accountNumber;
         private LocalDateTime unregisteredAt;
 
-        public static DeleteAccount.Response of(Account account,Long userId) {
+        public static DeleteAccount.Response of(AccountDto dto) {
 
             return Response.builder()
-                    .userId(userId)
-                    .accountNumber(account.getAccountNumber())
-                    .unregisteredAt(account.getUnregisteredAt())
+                    .userId(dto.getUserId())
+                    .accountNumber(dto.getAccountNumber())
+                    .unregisteredAt(dto.getUnregisteredAt())
                     .build();
         }
     }

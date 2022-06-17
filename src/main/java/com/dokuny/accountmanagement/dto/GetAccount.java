@@ -17,19 +17,19 @@ public class GetAccount {
         private String accountNumber;
         private Long balance;
 
-        public static GetAccount.Response of(Account account) {
+        public static GetAccount.Response of(AccountDto dto) {
 
             return Response.builder()
-                    .accountNumber(account.getAccountNumber())
-                    .balance(account.getBalance())
+                    .accountNumber(dto.getAccountNumber())
+                    .balance(dto.getBalance())
                     .build();
         }
 
-        public static List<Response> of(List<Account> accounts) {
+        public static List<Response> of(List<AccountDto> dtos) {
             ArrayList<Response> list = new ArrayList<>();
 
-            for (Account account : accounts) {
-                list.add(Response.of(account));
+            for (AccountDto dto : dtos) {
+                list.add(Response.of(dto));
             }
             return list;
         }

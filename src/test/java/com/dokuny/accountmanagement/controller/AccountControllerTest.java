@@ -1,9 +1,9 @@
 package com.dokuny.accountmanagement.controller;
 
-import com.dokuny.accountmanagement.domain.Account;
-import com.dokuny.accountmanagement.domain.AccountUser;
+import com.dokuny.accountmanagement.dto.AccountDto;
+import com.dokuny.accountmanagement.dto.CreateAccount;
+import com.dokuny.accountmanagement.dto.DeleteAccount;
 import com.dokuny.accountmanagement.exception.AccountException;
-import com.dokuny.accountmanagement.type.AccountStatus;
 import com.dokuny.accountmanagement.service.AccountService;
 import com.dokuny.accountmanagement.type.ErrorCode;
 
@@ -21,9 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -57,24 +55,23 @@ class AccountControllerTest {
         LocalDateTime time = LocalDateTime.now();
 
         given(accountService.createAccount(10L, 500L))
-                .willReturn(Account.builder()
-                        .id(10L)
-                        .accountStatus(AccountStatus.IN_USE)
+                .willReturn(AccountDto.builder()
+                        .userId(10L)
                         .balance(500L)
-                        .accountUser(null)
                         .accountNumber("1234567890")
                         .registeredAt(time)
                         .build());
 
-        Map<String, Long> input = new HashMap<>();
-        input.put("userId", 10L);
-        input.put("initialBalance", 500L);
+        CreateAccount.Request request = CreateAccount.Request.builder()
+                .userId(10L)
+                .initialBalance(500L)
+                .build();
 
         //when
         //then
         mockMvc.perform(post("/account")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.userId").value(10))
                 .andExpect(jsonPath("$.accountNumber")
@@ -94,15 +91,16 @@ class AccountControllerTest {
         given(accountService.createAccount(anyLong(), anyLong()))
                 .willThrow(exception);
 
-        Map<String, Long> input = new HashMap<>();
-        input.put("userId", 11L);
-        input.put("initialBalance", 500L);
+        CreateAccount.Request request = CreateAccount.Request.builder()
+                .userId(11L)
+                .initialBalance(500L)
+                .build();
 
         //when
         //then
         mockMvc.perform(post("/account")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(jsonPath("$.status")
                         .value(HttpStatus.BAD_REQUEST.value()))
@@ -125,10 +123,10 @@ class AccountControllerTest {
     @DisplayName("사용자의 모든 계좌 조회 성공")
     void getAccountAllSuccess() throws Exception {
         //given
-        List<Account> list = new ArrayList<>();
+        List<AccountDto> list = new ArrayList<>();
 
         for (int i = 0; i < 2; i++) {
-            list.add(Account.builder()
+            list.add(AccountDto.builder()
                     .accountNumber("1234567890")
                     .balance(500L)
                     .build());
@@ -185,23 +183,22 @@ class AccountControllerTest {
         LocalDateTime time = LocalDateTime.now();
         //given
         given(accountService.unregisterAccount(10L, "1234567890"))
-                .willReturn(Account.builder()
+                .willReturn(AccountDto.builder()
                         .unregisteredAt(time)
                         .accountNumber("1234567890")
-                        .accountStatus(AccountStatus.CLOSED)
-                        .accountUser(AccountUser.builder()
-                                .id(10L)
-                                .build())
+                        .userId(10L)
                         .build());
 
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("userId", 10L);
-        map.put("accountNumber", "1234567890");
+        DeleteAccount.Request request = DeleteAccount.Request.builder()
+                .userId(10L)
+                .accountNumber("1234567890")
+                .build();
+
         //when
         //then
         mockMvc.perform(delete("/account")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(map)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(jsonPath("$.userId").value(10L))
                 .andExpect(jsonPath("$.accountNumber")
@@ -223,14 +220,15 @@ class AccountControllerTest {
         given(accountService.unregisterAccount(10L, "1234567890"))
                 .willThrow(ex);
 
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("userId", 10L);
-        map.put("accountNumber", "1234567890");
+        DeleteAccount.Request request = DeleteAccount.Request.builder()
+                .userId(10L)
+                .accountNumber("1234567890")
+                .build();
         //when
         //then
         mockMvc.perform(delete("/account")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(map)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(jsonPath("$.errorCode").value(ex.getErrorCode().toString()))
                 .andExpect(jsonPath("$.errorMessage")
                         .value(ex.getErrorMessage()))

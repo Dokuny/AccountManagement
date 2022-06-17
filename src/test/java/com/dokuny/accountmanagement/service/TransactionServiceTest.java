@@ -2,15 +2,18 @@ package com.dokuny.accountmanagement.service;
 
 import com.dokuny.accountmanagement.domain.Account;
 import com.dokuny.accountmanagement.domain.Transaction;
+import com.dokuny.accountmanagement.dto.TransactionDto;
 import com.dokuny.accountmanagement.exception.TransactionException;
 import com.dokuny.accountmanagement.repository.AccountRepository;
 import com.dokuny.accountmanagement.repository.TransactionRepository;
 import com.dokuny.accountmanagement.type.AccountStatus;
+import com.dokuny.accountmanagement.type.ErrorCode;
 import com.dokuny.accountmanagement.type.TransactionResultStatus;
 import com.dokuny.accountmanagement.type.TransactionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +24,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -63,13 +68,16 @@ class TransactionServiceTest {
         given(transactionRepository.save(any(Transaction.class)))
                 .willReturn(transaction);
 
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
 
         //when
-        Transaction save =
-                transactionService.useBalance(anyLong(), anyString(), 500L);
+
+        TransactionDto dto = transactionService.useBalance(anyLong(), anyString(), 500L);
 
         //then
-        assertEquals(500L, save.getAccount().getBalance());
+        verify(transactionRepository,times(1)).save(captor.capture());
+        assertEquals(500L, dto.getAmount());
+        assertEquals(500L,captor.getValue().getAccount().getBalance());
     }
 
     @Test
@@ -81,10 +89,12 @@ class TransactionServiceTest {
                 .willReturn(Optional.empty());
 
         //when
-        //then
-        assertThrows(TransactionException.class, () ->
+        TransactionException ex = assertThrows(TransactionException.class, () ->
                 transactionService.
                         useBalance(10L, "test", 500L));
+        //then
+        assertEquals(ErrorCode.NO_SUCH_ACCOUNT, ex.getErrorCode());
+
 
     }
 
@@ -102,10 +112,12 @@ class TransactionServiceTest {
                 .willReturn(Optional.of(account));
 
         //when
-        //then
-        assertThrows(TransactionException.class, () ->
+        TransactionException ex = assertThrows(TransactionException.class, () ->
                 transactionService.
                         useBalance(10L, "test", 500L));
+        //then
+        assertEquals(ErrorCode.ALREADY_CLOSED_ACCOUNT, ex.getErrorCode());
+
     }
 
     @Test
@@ -122,10 +134,11 @@ class TransactionServiceTest {
                 .willReturn(Optional.of(account));
 
         //when
-        //then
-        assertThrows(TransactionException.class, () ->
+        TransactionException ex = assertThrows(TransactionException.class, () ->
                 transactionService.
                         useBalance(10L, "test", 500L));
+        //then
+        assertEquals(ErrorCode.NOT_ENOUGH_BALANCE, ex.getErrorCode());
     }
 
     /**
@@ -166,16 +179,37 @@ class TransactionServiceTest {
         given(transactionRepository.save(any(Transaction.class)))
                 .willReturn(cancelTransaction);
 
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+
         //when
-        Transaction result =
-                transactionService
-                        .cancelTransaction(
-                                "test", "test", 500L);
+
+        TransactionDto dto = transactionService
+                .cancelTransaction(
+                        "test", "test", 500L);
 
         //then
-        assertEquals(1000L, result.getAccount().getBalance());
+        verify(transactionRepository,times(1)).save(captor.capture());
+        assertEquals(500L, dto.getAmount());
+        assertEquals(1000L,captor.getValue().getAccount().getBalance());
     }
 
+    @Test
+    @DisplayName("거래 취소 실패 - 트랜잭션이 존재하지 않을 때")
+    void cancelTransactionFailByTRANSACTION_NOT_EXIST() {
+        //given
+        LocalDateTime time = LocalDateTime.now().minusYears(2);
+
+        given(transactionRepository
+                .findByIdAndAccount_AccountNumberAndTransactionType(
+                        anyString(), anyString(), any()))
+                .willReturn(Optional.empty());
+
+        //when
+        TransactionException ex = assertThrows(TransactionException.class, () -> transactionService
+                .cancelTransaction("test", "test", 500L));
+        //then
+        assertEquals(ErrorCode.TRANSACTION_NOT_EXIST, ex.getErrorCode());
+    }
     @Test
     @DisplayName("거래 취소 실패 - 거래한지 1년 경과")
     void cancelTransactionFailByTRANSACTION_CANCEL_EXPIRED() {
@@ -195,9 +229,10 @@ class TransactionServiceTest {
                         .build()));
 
         //when
-        //then
-        assertThrows(TransactionException.class, () -> transactionService
+        TransactionException ex = assertThrows(TransactionException.class, () -> transactionService
                 .cancelTransaction("test", "test", 500L));
+        //then
+        assertEquals(ErrorCode.TRANSACTION_CANCEL_EXPIRED, ex.getErrorCode());
     }
 
     @Test
@@ -218,9 +253,11 @@ class TransactionServiceTest {
                         .build()));
 
         //when
-        //then
-        assertThrows(TransactionException.class, () -> transactionService
+        TransactionException ex = assertThrows(TransactionException.class, () -> transactionService
                 .cancelTransaction("test", "test", 500L));
+        //then
+        assertEquals(ErrorCode.CANCEL_AMOUNT_NOT_CORRECT, ex.getErrorCode());
+
     }
 
 
@@ -236,8 +273,9 @@ class TransactionServiceTest {
                 .willReturn(Optional.empty());
 
         //when
-        //then
-        assertThrows(TransactionException.class,
+        TransactionException ex = assertThrows(TransactionException.class,
                 () -> transactionService.checkTransaction("01234567890"));
+        //then
+        assertEquals(ErrorCode.TRANSACTION_NOT_EXIST,ex.getErrorCode());
     }
 }

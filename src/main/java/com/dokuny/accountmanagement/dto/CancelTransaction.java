@@ -46,13 +46,13 @@ public class CancelTransaction {
         private LocalDateTime transactedAt;
 
 
-        public static Response of(Transaction transaction, String accountNumber) {
+        public static Response of(TransactionDto dto) {
             return Response.builder()
-                    .accountNumber(accountNumber)
-                    .transactionId(transaction.getId())
-                    .transactionResultStatus(transaction.getTransactionResultStatus())
-                    .amount(transaction.getAmount())
-                    .transactedAt(transaction.getTransactedAt())
+                    .accountNumber(dto.getAccountNumber())
+                    .transactionId(dto.getTransactionId())
+                    .transactionResultStatus(dto.getTransactionResultStatus())
+                    .amount(dto.getAmount())
+                    .transactedAt(dto.getTransactedAt())
                     .build();
         }
 

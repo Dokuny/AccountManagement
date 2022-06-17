@@ -45,13 +45,13 @@ public class UseBalanceTransaction {
         private LocalDateTime transactedAt;
 
 
-        public static Response of(Transaction transaction,String accountNumber,Long amount) {
+        public static Response of(TransactionDto dto) {
             return Response.builder()
-                    .accountNumber(accountNumber)
-                    .transactionResultStatus(transaction.getTransactionResultStatus())
-                    .transactionId(transaction.getId())
-                    .amount(amount)
-                    .transactedAt(transaction.getTransactedAt())
+                    .accountNumber(dto.getAccountNumber())
+                    .transactionResultStatus(dto.getTransactionResultStatus())
+                    .transactionId(dto.getTransactionId())
+                    .amount(dto.getAmount())
+                    .transactedAt(dto.getTransactedAt())
                     .build();
         }
 

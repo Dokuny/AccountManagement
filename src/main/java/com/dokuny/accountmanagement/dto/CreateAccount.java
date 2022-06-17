@@ -35,12 +35,12 @@ public class CreateAccount {
         private String accountNumber;
         private LocalDateTime registeredAt;
 
-        public static Response of(Long userId,Account account) {
+        public static Response of(AccountDto accountDto) {
 
             return Response.builder()
-                    .userId(userId)
-                    .accountNumber(account.getAccountNumber())
-                    .registeredAt(account.getRegisteredAt())
+                    .userId(accountDto.getUserId())
+                    .accountNumber(accountDto.getAccountNumber())
+                    .registeredAt(accountDto.getRegisteredAt())
                     .build();
         }
     }

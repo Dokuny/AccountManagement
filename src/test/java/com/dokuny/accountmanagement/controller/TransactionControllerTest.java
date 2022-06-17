@@ -4,6 +4,7 @@ package com.dokuny.accountmanagement.controller;
 import com.dokuny.accountmanagement.domain.Account;
 import com.dokuny.accountmanagement.domain.Transaction;
 import com.dokuny.accountmanagement.dto.CancelTransaction;
+import com.dokuny.accountmanagement.dto.TransactionDto;
 import com.dokuny.accountmanagement.dto.UseBalanceTransaction;
 import com.dokuny.accountmanagement.exception.TransactionException;
 
@@ -62,12 +63,11 @@ class TransactionControllerTest {
                         .build();
 
         given(transactionService.useBalance(anyLong(), anyString(), anyLong()))
-                .willReturn(Transaction.builder()
-                        .id("test")
+                .willReturn(TransactionDto.builder()
                         .transactionType(TransactionType.USE)
-                        .account(null)
+                        .transactionId("test")
+                        .accountNumber("1234567890")
                         .amount(500L)
-                        .balanceSnapShot(500L)
                         .transactedAt(time)
                         .transactionResultStatus(TransactionResultStatus.SUCCESS)
                         .build());
@@ -141,12 +141,11 @@ class TransactionControllerTest {
                         .build();
 
         given(transactionService.cancelTransaction(anyString(), anyString(), anyLong()))
-                .willReturn(Transaction.builder()
-                        .id("test")
+                .willReturn(TransactionDto.builder()
+                        .transactionId("test")
                         .transactionType(TransactionType.CANCEL)
-                        .account(null)
+                        .accountNumber("1234567890")
                         .amount(500L)
-                        .balanceSnapShot(500L)
                         .transactedAt(time)
                         .transactionResultStatus(TransactionResultStatus.SUCCESS)
                         .build());
@@ -214,12 +213,11 @@ class TransactionControllerTest {
         //given
         LocalDateTime time = LocalDateTime.now();
         given(transactionService.checkTransaction(anyString()))
-                .willReturn(Transaction.builder()
-                        .id("test")
+                .willReturn(TransactionDto.builder()
+                        .transactionId("test")
                         .transactionType(TransactionType.USE)
-                        .account(Account.builder().accountNumber("1234567890").build())
+                        .accountNumber("1234567890")
                         .amount(500L)
-                        .balanceSnapShot(500L)
                         .transactedAt(time)
                         .transactionResultStatus(TransactionResultStatus.SUCCESS)
                         .build());

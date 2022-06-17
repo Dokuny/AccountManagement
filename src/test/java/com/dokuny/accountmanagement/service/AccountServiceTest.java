@@ -3,14 +3,17 @@ package com.dokuny.accountmanagement.service;
 import com.dokuny.accountmanagement.config.policy.PolicyAccountProperties;
 import com.dokuny.accountmanagement.domain.Account;
 import com.dokuny.accountmanagement.domain.AccountUser;
+import com.dokuny.accountmanagement.dto.AccountDto;
 import com.dokuny.accountmanagement.exception.AccountException;
 import com.dokuny.accountmanagement.repository.AccountUserRepository;
 import com.dokuny.accountmanagement.service.util.AccountNumGenerator;
 import com.dokuny.accountmanagement.type.AccountStatus;
 import com.dokuny.accountmanagement.repository.AccountRepository;
+import com.dokuny.accountmanagement.type.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,6 +25,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
@@ -50,10 +55,10 @@ class AccountServiceTest {
     @DisplayName("계좌 생성 성공")
     void createAccountSuccess() {
         //given
-        AccountUser user = AccountUser.builder()
-                .id(10L).build();
+        AccountUser user = AccountUser.builder().id(10L).build();
 
         Account account = Account.builder()
+                .id(10L)
                 .accountStatus(AccountStatus.IN_USE)
                 .balance(1000L)
                 .accountUser(user)
@@ -70,7 +75,7 @@ class AccountServiceTest {
                 .willReturn(9);
 
         given(accountNumGenerator.generateNumber())
-                .willReturn("1234567890");
+                .willReturn("1111111111");
 
         given(accountRepository.existsAccountByAccountNumber(anyString()))
                 .willReturn(false);
@@ -78,16 +83,22 @@ class AccountServiceTest {
         given(accountRepository.save(any(Account.class)))
                 .willReturn(account);
 
+        ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
+
+
+
         //when
-        Account createAccount=
+        AccountDto createAccount =
                 accountService.createAccount(10L, 1000L);
 
+
+
         //then
+        verify(accountRepository, times(1)).save(captor.capture());
         assertAll(
+                () -> assertEquals("1111111111", captor.getValue().getAccountNumber()),
                 () -> assertEquals(1000, createAccount.getBalance()),
-                () -> assertEquals(10, createAccount.getAccountNumber().length()),
-                () -> assertEquals(AccountStatus.IN_USE, createAccount.getAccountStatus())
-        );
+                () -> assertEquals(10, createAccount.getAccountNumber().length()));
     }
 
     @Test
@@ -97,9 +108,12 @@ class AccountServiceTest {
         given(accountUserRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
         //when
-        //then
-        assertThrows(AccountException.class,
+        AccountException ex = assertThrows(AccountException.class,
                 () -> accountService.createAccount(10L, 1000L));
+
+        //then
+        assertEquals(ErrorCode.USER_NOT_EXIST, ex.getErrorCode());
+
     }
 
     @Test
@@ -113,9 +127,10 @@ class AccountServiceTest {
                 .willReturn(10);
 
         //when
-        //then
-        assertThrows(AccountException.class,
+        AccountException ex = assertThrows(AccountException.class,
                 () -> accountService.createAccount(10L, 1000L));
+        //then
+        assertEquals(ErrorCode.USER_MAX_ACCOUNT, ex.getErrorCode());
     }
 
 
@@ -126,22 +141,25 @@ class AccountServiceTest {
     @DisplayName("계좌 해지 성공")
     void unregisterAccountSuccess() {
         //given
+
+        Optional<Account> account = Optional.of(Account.builder()
+                .accountStatus(AccountStatus.IN_USE)
+                .balance(0L)
+                .accountUser(AccountUser.builder()
+                        .id(10L)
+                        .build())
+                .build());
+
         given(accountRepository.findByAccountNumber(anyString()))
-                .willReturn(Optional.of(Account.builder()
-                        .accountStatus(AccountStatus.IN_USE)
-                        .balance(0L)
-                        .accountUser(AccountUser.builder()
-                                .id(10L)
-                                .build())
-                        .build()));
+                .willReturn(account);
         //when
-        Account account =
+        AccountDto dto =
                 accountService.unregisterAccount(10L, "1234567890");
 
         //then
         assertAll(
-                () -> assertEquals(AccountStatus.CLOSED, account.getAccountStatus()),
-                () -> assertNotNull(account.getUnregisteredAt())
+                () -> assertEquals(AccountStatus.CLOSED, account.get().getAccountStatus()),
+                () -> assertNotNull(dto.getUnregisteredAt())
         );
     }
 
@@ -152,9 +170,10 @@ class AccountServiceTest {
         given(accountRepository.findByAccountNumber(anyString()))
                 .willReturn(Optional.empty());
         //when
-        //then
-        assertThrows(AccountException.class, () ->
+        AccountException ex = assertThrows(AccountException.class, () ->
                 accountService.unregisterAccount(10L, "1234567890"));
+        //then
+        assertEquals(ErrorCode.ACCOUNT_NOT_EXIST,ex.getErrorCode());
     }
 
     @Test
@@ -171,9 +190,10 @@ class AccountServiceTest {
                         .build()));
 
         //when
-        //then
-        assertThrows(AccountException.class, () ->
+        AccountException ex = assertThrows(AccountException.class, () ->
                 accountService.unregisterAccount(20L, "1234567890"));
+        //then
+        assertEquals(ErrorCode.USER_NOT_ACCOUNT_OWNER,ex.getErrorCode());
     }
 
     @Test
@@ -189,9 +209,11 @@ class AccountServiceTest {
                                 .build())
                         .build()));
         //when
-        //then
-        assertThrows(AccountException.class, () ->
+        AccountException ex = assertThrows(AccountException.class, () ->
                 accountService.unregisterAccount(10L, "1234567890"));
+        //then
+        assertEquals(ErrorCode.ACCOUNT_INVALID, ex.getErrorCode());
+
     }
 
     @Test
@@ -207,9 +229,10 @@ class AccountServiceTest {
                                 .build())
                         .build()));
         //when
-        //then
-        assertThrows(AccountException.class, () ->
+        AccountException ex = assertThrows(AccountException.class, () ->
                 accountService.unregisterAccount(10L, "1234567890"));
+        //then
+        assertEquals(ErrorCode.ACCOUNT_REMAINED_BALANCE,ex.getErrorCode());
     }
 
 
@@ -225,7 +248,7 @@ class AccountServiceTest {
         List<Account> list = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
-            list.add(Account.builder().build());
+            list.add(Account.builder().accountUser(AccountUser.builder().id(10L).build()).build());
         }
 
         given(accountUserRepository.existsById(anyLong()))
@@ -236,7 +259,7 @@ class AccountServiceTest {
 
 
         //when
-        List<Account> accounts = accountService.getAccountAll(10L);
+        List<AccountDto> accounts = accountService.getAccountAll(10L);
 
         //then
         assertEquals(10, accounts.size());
@@ -250,13 +273,11 @@ class AccountServiceTest {
                 .willReturn(false);
 
         //when
-        //then
-        assertThrows(AccountException.class,
+        AccountException ex = assertThrows(AccountException.class,
                 () -> accountService.getAccountAll(10L));
+        //then
+        assertEquals(ErrorCode.USER_NOT_EXIST, ex.getErrorCode());
     }
-
-
-
 
 
 }

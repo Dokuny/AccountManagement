@@ -23,14 +23,14 @@ public class CheckTransaction {
         private LocalDateTime transactedAt;
 
 
-        public static Response of(Transaction transaction) {
+        public static Response of(TransactionDto dto) {
             return Response.builder()
-                    .accountNumber(transaction.getAccount().getAccountNumber())
-                    .transactionType(transaction.getTransactionType())
-                    .transactionResultStatus(transaction.getTransactionResultStatus())
-                    .transactionId(transaction.getId())
-                    .amount(transaction.getAmount())
-                    .transactedAt(transaction.getTransactedAt())
+                    .accountNumber(dto.getAccountNumber())
+                    .transactionType(dto.getTransactionType())
+                    .transactionResultStatus(dto.getTransactionResultStatus())
+                    .transactionId(dto.getTransactionId())
+                    .amount(dto.getAmount())
+                    .transactedAt(dto.getTransactedAt())
                     .build();
         }
     }

@@ -1,6 +1,7 @@
 package com.dokuny.accountmanagement.controller;
 
 import com.dokuny.accountmanagement.domain.Account;
+import com.dokuny.accountmanagement.dto.AccountDto;
 import com.dokuny.accountmanagement.dto.CreateAccount;
 import com.dokuny.accountmanagement.dto.DeleteAccount;
 import com.dokuny.accountmanagement.dto.GetAccount;
@@ -20,29 +21,21 @@ public class AccountController {
     @PostMapping
     public CreateAccount.Response createAccount(
             @RequestBody @Valid CreateAccount.Request request) {
-
-        Account account = accountService.createAccount(
-                request.getUserId(), request.getInitialBalance());
-
-        return CreateAccount.Response.of(request.getUserId(), account);
+        return CreateAccount.Response.of(
+                accountService
+                        .createAccount(request.getUserId(), request.getInitialBalance()));
     }
 
     @GetMapping("/{userId}")
     public List<GetAccount.Response> getAccountAll(@PathVariable Long userId) {
-
-        List<Account> accounts = accountService.getAccountAll(userId);
-
-        return GetAccount.Response.of(accounts);
+        return GetAccount.Response.of(accountService.getAccountAll(userId));
     }
 
     @DeleteMapping
     public DeleteAccount.Response unregisterAccount(
             @RequestBody @Valid DeleteAccount.Request request) {
 
-        Account account =
-                accountService.unregisterAccount(
-                        request.getUserId(), request.getAccountNumber());
-
-        return DeleteAccount.Response.of(account, request.getUserId());
+        return DeleteAccount.Response.of(
+                accountService.unregisterAccount(request.getUserId(), request.getAccountNumber()));
     }
 }
