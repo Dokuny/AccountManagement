@@ -34,13 +34,7 @@ public class AccountDto {
     public static List<AccountDto> of(List<Account> accounts) {
         List<AccountDto> list = new ArrayList<>();
         for (Account account : accounts) {
-            list.add(AccountDto.builder()
-                    .userId(account.getAccountUser().getId())
-                    .balance(account.getBalance())
-                    .accountNumber(account.getAccountNumber())
-                    .registeredAt(account.getRegisteredAt())
-                    .unregisteredAt(account.getUnregisteredAt())
-                    .build());
+            list.add(of(account));
         }
         return list;
     }
