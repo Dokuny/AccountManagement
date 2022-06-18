@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter@Setter
 @AllArgsConstructor
@@ -32,10 +33,6 @@ public class AccountDto {
     }
 
     public static List<AccountDto> of(List<Account> accounts) {
-        List<AccountDto> list = new ArrayList<>();
-        for (Account account : accounts) {
-            list.add(of(account));
-        }
-        return list;
+        return accounts.stream().map(AccountDto::of).collect(Collectors.toList());
     }
 }
