@@ -160,7 +160,8 @@ class AccountControllerTest {
                 .willThrow(ex);
         //when
         //then
-        mockMvc.perform(get("/account/1234"))
+        mockMvc.perform(get("/account")
+                        .queryParam("usedId","1234"))
                 .andDo(print())
                 .andExpect(jsonPath("$.status")
                         .value(HttpStatus.BAD_REQUEST.value()))
