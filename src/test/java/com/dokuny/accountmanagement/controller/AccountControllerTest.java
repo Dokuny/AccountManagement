@@ -137,7 +137,8 @@ class AccountControllerTest {
 
         //when
         //then
-        mockMvc.perform(get("/account/1234"))
+        mockMvc.perform(get("/account")
+                        .queryParam("userId","1234"))
                 .andDo(print())
                 .andExpect(jsonPath("$[0].accountNumber")
                         .value("1234567890"))

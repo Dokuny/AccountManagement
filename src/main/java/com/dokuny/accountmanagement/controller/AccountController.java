@@ -26,8 +26,8 @@ public class AccountController {
                         .createAccount(request.getUserId(), request.getInitialBalance()));
     }
 
-    @GetMapping("/{userId}")
-    public List<GetAccount.Response> getAccountAll(@PathVariable Long userId) {
+    @GetMapping
+    public List<GetAccount.Response> getAccountAll(@RequestParam("userId") Long userId) {
         return GetAccount.Response.of(accountService.getAccountAll(userId));
     }
 
