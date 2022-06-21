@@ -23,18 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class LockAopAspect {
 
     private final LockService lockService;
-
-    @Around("@annotation(com.dokuny.accountmanagement.aop.UserLock) && args(request) ")
-    public Object spinLockByUser(ProceedingJoinPoint pjp, UserLockIdInterface request) throws Throwable {
-
-        lockService.lock(request.getUserId().toString());
-
-        try {
-            return pjp.proceed();
-        } finally {
-            lockService.unlock(request.getUserId().toString());
-        }
-    }
+    
 
     @Around("@annotation(com.dokuny.accountmanagement.aop.AccountLock) && args(request)")
     public Object spinLockByAccount(ProceedingJoinPoint pjp, AccountLockIdInterface request) throws Throwable {

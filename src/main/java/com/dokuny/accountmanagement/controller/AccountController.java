@@ -18,7 +18,6 @@ import java.util.List;
 public class AccountController {
     private final AccountService accountService;
 
-    @UserLock
     @PostMapping
     public CreateAccount.Response createAccount(
             @RequestBody @Valid CreateAccount.Request request) {
