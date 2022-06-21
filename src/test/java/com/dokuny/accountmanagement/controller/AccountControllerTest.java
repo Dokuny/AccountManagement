@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -161,7 +163,7 @@ class AccountControllerTest {
         //when
         //then
         mockMvc.perform(get("/account")
-                        .queryParam("usedId","1234"))
+                        .queryParam("userId","1234"))
                 .andDo(print())
                 .andExpect(jsonPath("$.status")
                         .value(HttpStatus.BAD_REQUEST.value()))

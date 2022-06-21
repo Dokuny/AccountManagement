@@ -1,11 +1,11 @@
 package com.dokuny.accountmanagement.controller;
 
-import com.dokuny.accountmanagement.domain.Account;
-import com.dokuny.accountmanagement.dto.AccountDto;
 import com.dokuny.accountmanagement.dto.CreateAccount;
 import com.dokuny.accountmanagement.dto.DeleteAccount;
 import com.dokuny.accountmanagement.dto.GetAccount;
 import com.dokuny.accountmanagement.service.AccountService;
+import com.dokuny.accountmanagement.aop.AccountLock;
+import com.dokuny.accountmanagement.aop.UserLock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +18,7 @@ import java.util.List;
 public class AccountController {
     private final AccountService accountService;
 
+    @UserLock
     @PostMapping
     public CreateAccount.Response createAccount(
             @RequestBody @Valid CreateAccount.Request request) {
@@ -31,6 +32,7 @@ public class AccountController {
         return GetAccount.Response.of(accountService.getAccountAll(userId));
     }
 
+    @AccountLock
     @DeleteMapping
     public DeleteAccount.Response unregisterAccount(
             @RequestBody @Valid DeleteAccount.Request request) {

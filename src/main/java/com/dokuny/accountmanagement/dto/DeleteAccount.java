@@ -1,5 +1,6 @@
 package com.dokuny.accountmanagement.dto;
 
+import com.dokuny.accountmanagement.aop.AccountLockIdInterface;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -15,7 +16,7 @@ public class DeleteAccount {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    public static class Request {
+    public static class Request implements AccountLockIdInterface {
 
         @NotNull
         @Min(value = 1,message = "부적절한 ID 값 입니다.")

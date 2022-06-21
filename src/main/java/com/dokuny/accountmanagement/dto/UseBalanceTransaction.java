@@ -1,5 +1,6 @@
 package com.dokuny.accountmanagement.dto;
 
+import com.dokuny.accountmanagement.aop.AccountLockIdInterface;
 import com.dokuny.accountmanagement.domain.Transaction;
 import com.dokuny.accountmanagement.type.TransactionResultStatus;
 import lombok.*;
@@ -17,7 +18,7 @@ public class UseBalanceTransaction {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Request {
+    public static class Request implements AccountLockIdInterface {
 
         @NotNull
         @Min(value = 1,message = "부적절한 ID 값 입니다.")

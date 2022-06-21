@@ -7,7 +7,6 @@ import com.dokuny.accountmanagement.dto.TransactionDto;
 import com.dokuny.accountmanagement.exception.TransactionException;
 import com.dokuny.accountmanagement.repository.AccountRepository;
 import com.dokuny.accountmanagement.repository.TransactionRepository;
-import com.dokuny.accountmanagement.service.aop.AccountLock;
 import com.dokuny.accountmanagement.type.AccountStatus;
 import com.dokuny.accountmanagement.type.ErrorCode;
 import com.dokuny.accountmanagement.type.TransactionResultStatus;
@@ -27,7 +26,7 @@ public class TransactionService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
 
-    @AccountLock
+
     @Transactional
     public TransactionDto useBalance(Long userId, String accountNumber, Long amount) {
         Account account = accountRepository
@@ -52,7 +51,7 @@ public class TransactionService {
                 .build()));
     }
 
-    @AccountLock
+
     @Transactional
     public TransactionDto cancelTransaction(
             String transactionId, String accountNumber, Long amount) {

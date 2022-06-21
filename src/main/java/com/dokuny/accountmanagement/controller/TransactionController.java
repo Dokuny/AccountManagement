@@ -5,6 +5,7 @@ import com.dokuny.accountmanagement.dto.CheckTransaction;
 import com.dokuny.accountmanagement.dto.UseBalanceTransaction;
 
 import com.dokuny.accountmanagement.service.TransactionService;
+import com.dokuny.accountmanagement.aop.AccountLock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    @AccountLock
     @PostMapping("/use")
     public UseBalanceTransaction.Response useBalanceByTransaction(
             @RequestBody @Valid UseBalanceTransaction.Request request) {
@@ -26,6 +28,7 @@ public class TransactionController {
                         request.getUserId(), request.getAccountNumber(), request.getAmount()));
     }
 
+    @AccountLock
     @PostMapping("/cancel")
     public CancelTransaction.Response cancelTransaction(
             @RequestBody @Valid CancelTransaction.Request request) {

@@ -1,5 +1,6 @@
 package com.dokuny.accountmanagement.dto;
 
+import com.dokuny.accountmanagement.aop.AccountLockIdInterface;
 import com.dokuny.accountmanagement.domain.Transaction;
 import com.dokuny.accountmanagement.type.TransactionResultStatus;
 import lombok.*;
@@ -19,7 +20,7 @@ public class CancelTransaction {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-   public static class Request {
+   public static class Request implements AccountLockIdInterface {
         @NotBlank
         private String transactionId;
 

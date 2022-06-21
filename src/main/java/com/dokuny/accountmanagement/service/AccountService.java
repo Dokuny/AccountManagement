@@ -1,8 +1,6 @@
 package com.dokuny.accountmanagement.service;
 
 import com.dokuny.accountmanagement.dto.AccountDto;
-import com.dokuny.accountmanagement.service.aop.AccountLock;
-import com.dokuny.accountmanagement.service.aop.UserLock;
 
 import com.dokuny.accountmanagement.config.policy.PolicyAccountProperties;
 import com.dokuny.accountmanagement.domain.Account;
@@ -22,14 +20,13 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-
 public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountUserRepository accountUserRepository;
     private final AccountNumGenerator accountNumGenerator;
     private final PolicyAccountProperties policyAccountProperties;
 
-    @UserLock
+
     @Transactional
     public AccountDto createAccount(
             Long userId, Long initialBalance) {
@@ -58,7 +55,7 @@ public class AccountService {
     }
 
 
-    @AccountLock
+
     @Transactional
     public AccountDto unregisterAccount(Long userId, String accountNumber) {
 

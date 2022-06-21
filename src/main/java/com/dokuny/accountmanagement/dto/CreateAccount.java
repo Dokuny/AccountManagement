@@ -1,5 +1,6 @@
 package com.dokuny.accountmanagement.dto;
 
+import com.dokuny.accountmanagement.aop.UserLockIdInterface;
 import com.dokuny.accountmanagement.domain.Account;
 import lombok.*;
 
@@ -13,7 +14,7 @@ public class CreateAccount {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    public static class Request{
+    public static class Request implements UserLockIdInterface {
 
         @NotNull
         @Min(value = 1,message = "부적절한 ID값 입니다.")
